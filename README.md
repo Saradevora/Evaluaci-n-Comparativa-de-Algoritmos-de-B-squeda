@@ -74,7 +74,8 @@ print(pq.pop())  # Salida: 2
 ### search.py
   Este implementa el núcleo del sistema de búsqueda:
   - Clase Problem: clase abstracta que establece establece la estructura básica de cualquier problema de búsqueda.
-  - Clase Node: encargada de representar los nodos del árbol de exploración junto con la información necesaria para reconstruir la solución.
+  - Clase Node: encargada de representar los nodos del árbol de exploración junto con la información necesaria para reconstruir la solución.  
+  
   A partir de estas clases se implementan los siguiente algoritmos de búsqueda:
   - BFS
   - DFS
@@ -82,6 +83,70 @@ print(pq.pop())  # Salida: 2
   - A*
 
   Además se incorporan la **clase Graph** y derivados para representar grafos dirigidos y no dirigidos. Asimismo, se define la **clase GPSProblem**, la cual modela un problema de navegación entre ciudades.  
+  En nuestro caso la clase Graph se vería de la siguiente forma:
+  ```
+class Graph:
+    def __init__(self, dict=None, directed=True):
+        self.dict = dict or {}
+        self.directed = directed
+        if not directed:
+            self.make_undirected()
+
+    def make_undirected(self):
+        """Make a digraph into an undirected graph by adding symmetric edges."""
+        for a in list(self.dict.keys()):
+            for (b, distance) in list(self.dict[a].items()):
+                self.connect1(b, a, distance)
+
+    def connect(self, A, B, distance=1):
+        """Add a link from A and B of given distance, and also add the inverse
+        link if the graph is undirected."""
+        self.connect1(A, B, distance)
+        if not self.directed: self.connect1(B, A, distance)
+
+    def connect1(self, A, B, distance):
+        """Add a link from A to B of given distance, in one direction only."""
+        self.dict.setdefault(A, {})[B] = distance
+
+    def get(self, a, b=None):
+        """Return a link distance or a dict of {node: distance} entries.
+        .get(a,b) returns the distance or None;
+        .get(a) returns a dict of {node: distance} entries, possibly {}."""
+        links = self.dict.setdefault(a, {})
+        if b is None:
+            return links
+        else:
+            return links.get(b)
+
+    def nodes(self):
+        """Return a list of nodes in the graph."""
+        return list(self.dict.keys())
+  ```
+
+  Y la clase GPSProblem se vería así:
+  ```
+  class GPSProblem(Problem):
+    """The problem of searching in a graph from one node to another."""
+
+    def __init__(self, initial, goal, graph):
+        Problem.__init__(self, initial, goal)
+        self.graph = graph
+
+    def successor(self, A):
+        """Return a list of (action, result) pairs."""
+        return [(B, B) for B in list(self.graph.get(A).keys())]
+
+    def path_cost(self, cost_so_far, A, action, B):
+        return cost_so_far + (self.graph.get(A, B) or infinity)
+
+    def h(self, node):
+        """h function is straight-line distance from a node's state to goal."""
+        locs = getattr(self.graph, 'locations', None)
+        if locs:
+            return int(distance(locs[node.state], locs[self.goal]))
+        else:
+            return infinity
+```
   Finalmente, se incluyen contadores globales para registrar el número de nodos generados y visitados durante la ejecución de cada algoritmo, facilitando así el análisis de su rendimiento.
 
 ### run.py
@@ -122,6 +187,9 @@ print(pq.pop())  # Salida: 2
 ## Conclusiones
   La búsqueda en amplitud (BFS) asegura que se encontrará la solución más cercana a la raíz del árbol de búsqueda, aunque no siempre será la de menor coste. Por su parte, la búsqueda en profundidad (DFS) suele ser eficiente en cuanto al uso de memoria, pero no garantiza obtener una solución óptima. Luego el algoritmo Branch & Bound permite encontrar la ruta de menor coste entre el estado inicial y el objetivo. Finalmente, A* mejora el rendimiento de Branch & Bound al incorporar una heurística admisible, lo que guía la búsqueda de manera más eficiente hacia la solución.
 
+## Vista de la tabla completada
+  Para este rabajo había que rellenar una tabla la cual era la comparación de estrategias de búsqueda, y aquí la adjunto aunque esta subida al repositorio:
+  ![Tabla de resultados](tabla_completada.png)
 
 ## Autor
 **Trabajo realizado por:** Sara Dévora Ortega  
