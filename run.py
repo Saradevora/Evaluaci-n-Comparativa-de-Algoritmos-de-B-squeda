@@ -18,7 +18,7 @@ def ejecutar(problema, metodo, nombre):
     print("Visitados:", search.NODOS_VISITADOS)
     print("Costo total:", coste)
     print("Ruta:", ruta)
-    print("Tiempo:", round(fin - inicio, 4), "seg")
+    print("Tiempo:", round(((fin - inicio) * 1000), 4), "ms")
 
 
 ab = search.GPSProblem('A', 'B', search.romania)
